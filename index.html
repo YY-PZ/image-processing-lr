@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторна 1-2: Віднімання зображень (Зведення та обробка)</title>
+
+    <!-- Стилізації проєкту -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/controls.css">
+    <link rel="stylesheet" href="css/preview.css">
+    <link rel="stylesheet" href="css/modal.css">
+</head>
+<body>
+
+    <header class="header">
+        <h1>Лабораторна 1-2: Віднімання зображень (Зведення та обробка)</h1>
+    </header>
+
+    <div class="app-container">
+        <!-- ЛІВА ПАНЕЛЬ (КЕРУВАННЯ) -->
+        <div class="controls-panel">
+            
+            <!-- 1. Завантаження -->
+            <div class="control-group">
+                <h3>1. Завантаження</h3>
+                <div class="file-upload-wrapper">
+                    <label class="btn" style="flex:1">Завантажити Зобр. 1
+                        <input type="file" id="uploadImg1" accept="image/*">
+                    </label>
+                    <div class="info-icon" id="infoBtn1">i<span class="tooltip" id="tooltipImg1">Файл не вибрано</span></div>
+                </div>
+                <div class="file-upload-wrapper">
+                    <label class="btn" style="flex:1">Завантажити Зобр. 2
+                        <input type="file" id="uploadImg2" accept="image/*">
+                    </label>
+                    <div class="info-icon" id="infoBtn2">i<span class="tooltip" id="tooltipImg2">Файл не вибрано</span></div>
+                </div>
+            </div>
+
+            <!-- 2. Блок зведення розмірів -->
+            <div class="control-group hidden" id="resizeSettings">
+                <h3>2. Узгодження розмірів</h3>
+                <div class="warning-text">⚠️ Розміри відрізняються. Оберіть як звести:</div>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size: 12px; font-weight: bold;">Базовий розмір:</label>
+                    <select id="resizeTarget">
+                        <option value="1">Зробити Зобр. 2 розміром як Зобр. 1</option>
+                        <option value="2">Зробити Зобр. 1 розміром як Зобр. 2</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size: 12px; font-weight: bold;">Метод зведення області:</label>
+                    <select id="resizeMethod">
+                        <option value="crop-center">Обрізати по центру</option>
+                        <option value="crop-topleft">Обрізати з лівого верхнього кута</option>
+                        <option value="stretch">Розтягнути / стиснути</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-action" id="btnApplyResize">Застосувати зведення</button>
+            </div>
+
+            <!-- 3. Параметри обробки -->
+            <div class="control-group">
+                <h3>3. Параметри обробки</h3>
+                <label style="font-size: 13px;">Допуск різниці (0-255):</label>
+                <input type="number" id="tolerance" value="0" min="0" max="255">
+                <div id="toleranceError" class="error-text hidden"></div>
+
+                <label style="font-size: 13px;">Спосіб обробки:</label>
+                <select id="processingEngine">
+                    <option value="js">Vanilla JS</option>
+                    <option value="worker">Web Workers</option>
+                </select>
+            </div>
+
+            <!-- 4. Обчислення -->
+            <div class="control-group">
+                <h3>4. Обчислення</h3>
+                <button class="btn btn-success" id="btnCalculate" disabled>Обчислити різницю</button>
+                <div style="margin-top: 10px;">
+                    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+                    <div class="status-text"><span id="progressText">Очікування...</span><span id="timeText">0 ms</span></div>
+                </div>
+            </div>
+
+            <!-- 5. Лог та Експорт -->
+            <div class="control-group">
+                <h3>5. Лог та Експорт</h3>
+                <textarea id="logConsole" readonly></textarea>
+                <div style="display: flex; gap: 5px;">
+                    <select id="exportFormat" style="margin-bottom: 0; width: 80px;">
+                        <option value="image/png">PNG</option>
+                        <option value="image/jpeg">JPG</option>
+                    </select>
+                    <button class="btn" id="btnSave" disabled style="flex:1">Зберегти результат</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ПРАВА ПАНЕЛЬ (КАНВАСИ) -->
+        <div class="preview-panel">
+            <div class="canvas-row">
+                <div class="canvas-box">
+                    <div class="canvas-label">Зображення 1 <span id="sizeLbl1"></span></div>
+                    <div class="placeholder-text" id="ph1">Завантажте Зображення 1</div>
+                    <canvas id="canvas1"></canvas>
+                </div>
+                <div class="canvas-box">
+                    <div class="canvas-label">Зображення 2 <span id="sizeLbl2"></span></div>
+                    <div class="placeholder-text" id="ph2">Завантажте Зображення 2</div>
+                    <canvas id="canvas2"></canvas>
+                </div>
+            </div>
+
+            <div class="canvas-box result-box">
+                <div class="canvas-label">Результат віднімання <span id="resHint" style="color: var(--primary); font-weight: normal; cursor: pointer; display: none;">(🔍 на весь екран)</span></div>
+                <div class="placeholder-text" id="phRes">Очікування обчислення...</div>
+                <canvas id="canvasResult" title="Клікніть для перегляду на весь екран"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНЕ ВІКНО ДЛЯ ПЕРЕГЛЯДУ НА ВЕСЬ ЕКРАН -->
+    <div id="fullscreenModal" class="fullscreen-modal hidden">
+        <div class="modal-header">
+            <span id="modalTitle">Результат віднімання</span>
+            <div class="modal-actions">
+                <button class="modal-btn modal-close" id="btnCloseModal" title="Закрити (Esc)">&times;</button>
+            </div>
+        </div>
+        <div class="modal-body" id="modalBackdrop">
+            <img id="fullscreenImg" alt="Зображення на весь екран">
+        </div>
+    </div>
+
+    <!-- МОДУЛІ СКРИПТІВ ПРОЄКТУ -->
+    <script src="js/state.js"></script>
+    <script src="js/logger.js"></script>
+    <script src="js/validator.js"></script>
+    <script src="js/uploader.js"></script>
+    <script src="js/resizer.js"></script>
+    <!-- Рушії обробки зображень -->
+    <script src="js/engines/vanilla-js.js"></script>
+    <script src="js/engines/worker.js"></script>
+    <script src="js/processor.js"></script>
+    <script src="js/exporter.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

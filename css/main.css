@@ -1,0 +1,64 @@
+:root {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --bg-color: #f8fafc;
+    --panel-bg: #ffffff;
+    --canvas-bg: #e2e8f0;
+    --border: #e2e8f0;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--primary);
+}
+
+.app-container {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.warning-text {
+    color: #b45309;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    background: #fef3c7;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.input-error {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+}
+
+.error-text {
+    color: #dc2626;
+    font-size: 11px;
+    margin-top: -6px;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
